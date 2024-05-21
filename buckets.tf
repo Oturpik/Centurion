@@ -2,18 +2,6 @@
 resource "aws_s3_bucket" "user_upload_bucket" {
   bucket = "user-upload-bucket"
 
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
   lifecycle {
     prevent_destroy = true
   }
@@ -21,6 +9,26 @@ resource "aws_s3_bucket" "user_upload_bucket" {
   tags = {
     Name        = "User Upload Bucket"
     Environment = "Production"
+  }
+}
+
+# Versioning configuration for User Upload Bucket
+resource "aws_s3_bucket_versioning" "user_upload_bucket_versioning" {
+  bucket = aws_s3_bucket.user_upload_bucket.bucket
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Server-Side Encryption configuration for User Upload Bucket
+resource "aws_s3_bucket_server_side_encryption_configuration" "user_upload_bucket_sse" {
+  bucket = aws_s3_bucket.user_upload_bucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
@@ -79,18 +87,6 @@ resource "aws_s3_bucket_policy" "user_upload_bucket_policy" {
 resource "aws_s3_bucket" "processed_images_bucket" {
   bucket = "processed-images-bucket"
 
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
   lifecycle {
     prevent_destroy = true
   }
@@ -98,6 +94,26 @@ resource "aws_s3_bucket" "processed_images_bucket" {
   tags = {
     Name        = "Processed Images Bucket"
     Environment = "Production"
+  }
+}
+
+# Versioning configuration for Processed Images Bucket
+resource "aws_s3_bucket_versioning" "processed_images_bucket_versioning" {
+  bucket = aws_s3_bucket.processed_images_bucket.bucket
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Server-Side Encryption configuration for Processed Images Bucket
+resource "aws_s3_bucket_server_side_encryption_configuration" "processed_images_bucket_sse" {
+  bucket = aws_s3_bucket.processed_images_bucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
