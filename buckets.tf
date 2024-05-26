@@ -1,6 +1,19 @@
+variable "terraform_role_arn" {
+  description = "The ARN of the IAM role to assume for Terraform"
+  type        = string
+}
+
+provider "aws" {
+  region = "us-west-2"
+
+  assume_role {
+    role_arn = var.terraform_role_arn
+  }
+}
+
 # User Upload Bucket
 resource "aws_s3_bucket" "user_upload_bucket" {
-  bucket = "user-upload-bucket"
+  bucket = "zilebado"
 
   lifecycle {
     prevent_destroy = true
@@ -10,6 +23,15 @@ resource "aws_s3_bucket" "user_upload_bucket" {
     Name        = "User Upload Bucket"
     Environment = "Production"
   }
+}
+
+# Public Access Block for User Upload Bucket
+resource "aws_s3_bucket_public_access_block" "user_upload_bucket_public_access" {
+  bucket                  = aws_s3_bucket.user_upload_bucket.id
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 # Versioning configuration for User Upload Bucket
@@ -52,40 +74,49 @@ resource "aws_s3_bucket_policy" "user_upload_bucket_policy" {
   bucket = aws_s3_bucket.user_upload_bucket.id
 
   policy = jsonencode({
-    Version: "2012-10-17",
-    Statement: [
-      {
-        Effect: "Allow",
-        Principal: "*",
-        Action: "s3:PutObject",
-        Resource: "${aws_s3_bucket.user_upload_bucket.arn}/*",
-        Condition: {
-          Bool: {
-            "aws:SecureTransport": "true"
-          },
-          StringEquals: {
-            "s3:x-amz-server-side-encryption": "AES256"
-          }
+        "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::zilebado/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-server-side-encryption": "AES256"
+                },
+                "Bool": {
+                    "aws:SecureTransport": "true"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::035431961317:role/lambda_s3_sns_role"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::zilebado/*"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::zilebado/*",
+            "Condition": {
+                "Bool": {
+                    "aws:SecureTransport": "true"
+                }
+            }
         }
-      },
-      {
-        Effect: "Allow",
-        Principal: "*",
-        Action: "s3:GetObject",
-        Resource: "${aws_s3_bucket.user_upload_bucket.arn}/*",
-        Condition: {
-          Bool: {
-            "aws:SecureTransport": "true"
-          }
-        }
-      }
     ]
+
   })
 }
 
 # Processed Images Bucket
 resource "aws_s3_bucket" "processed_images_bucket" {
-  bucket = "processed-images-bucket"
+  bucket = "zilecompleted"
 
   lifecycle {
     prevent_destroy = true
@@ -95,6 +126,15 @@ resource "aws_s3_bucket" "processed_images_bucket" {
     Name        = "Processed Images Bucket"
     Environment = "Production"
   }
+}
+
+# Public Access Block for Processed Images Bucket
+resource "aws_s3_bucket_public_access_block" "processed_images_bucket_public_access" {
+  bucket                  = aws_s3_bucket.processed_images_bucket.id
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 # Versioning configuration for Processed Images Bucket
@@ -137,19 +177,28 @@ resource "aws_s3_bucket_policy" "processed_images_bucket_policy" {
   bucket = aws_s3_bucket.processed_images_bucket.id
 
   policy = jsonencode({
-    Version: "2012-10-17",
-    Statement: [
-      {
-        Effect: "Allow",
-        Principal: "*",
-        Action: "s3:GetObject",
-        Resource: "${aws_s3_bucket.processed_images_bucket.arn}/*",
-        Condition: {
-          Bool: {
-            "aws:SecureTransport": "true"
-          }
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::zilecompleted/*",
+            "Condition": {
+                "Bool": {
+                    "aws:SecureTransport": "true"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::035431961317:role/lambda_s3_sns_role"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::zilecompleted/*"
         }
-      }
     ]
-  })
+}
+)
 }

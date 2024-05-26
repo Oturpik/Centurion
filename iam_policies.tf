@@ -42,7 +42,25 @@ resource "aws_iam_role" "lambda_role" {
           Service: "lambda.amazonaws.com"
         },
         Action: "sts:AssumeRole"
-      }
+        "Action": [
+				"s3:GetObject",
+				"s3:PutObject",
+				"s3:ListBucket",
+				"s3:PutObjectAcl"
+			],
+			"Effect": "Allow",
+			"Resource": [
+				"arn:aws:s3:::zilebado",
+				"arn:aws:s3:::zilebado/*",
+				"arn:aws:s3:::zilecompleted",
+				"arn:aws:s3:::zilecompleted/*"
+			],
+      },
+		{
+			"Action": "sns:Publish",
+			"Effect": "Allow",
+			"Resource": "arn:aws:sns:us-west-2:035431961317:image-processing-notifications"
+		}
     ]
   })
 }

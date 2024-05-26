@@ -23,7 +23,7 @@ def lambda_handler(event, context):
         image_data = response['Body'].read()
         
         # Resize the image
-        image = Image.open(io.BytesIO(image_data)).resize((800, 600), Image.ANTIALIAS)
+        image = Image.open(io.BytesIO(image_data)).resize((800, 600), Image.LANCZOS)
         
         # Save the image to a bytes buffer
         buffer = io.BytesIO()
@@ -33,9 +33,6 @@ def lambda_handler(event, context):
         # Upload the processed image to the processed bucket
         processed_key = f"processed-{key}"
         s3_client.put_object(Bucket=processed_bucket, Key=processed_key, Body=buffer)
-        
-        # Make the processed object public
-        s3_client.put_object_acl(ACL='public-read', Bucket=processed_bucket, Key=processed_key)
         
         # Generate the public URL
         public_url = f"https://{processed_bucket}.s3.amazonaws.com/{processed_key}"

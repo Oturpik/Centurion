@@ -1,10 +1,16 @@
+data "archive_file" "zipit" {
+  type        = "zip"
+  source_file = "lambda.py"
+  output_path = "lambda.zip"
+}
+
 resource "aws_lambda_function" "image_processing_lambda" {
-  filename         = "lambda.zip"
+  filename         = data.archive_file.zipit.output_path
   function_name    = "image_processing_lambda"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "lambda_function.lambda_handler"
+  handler          = "lambda.lambda_handler"
   runtime          = "python3.8"
-  source_code_hash = filebase64sha256("lambda.zip")
+  source_code_hash = data.archive_file.zipit.output_base64sha256
 
   environment {
     variables = {
