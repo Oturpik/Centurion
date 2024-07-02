@@ -9,7 +9,7 @@ resource "aws_lambda_function" "image_processing_lambda" {
   function_name    = "image_processing_lambda"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda.lambda_handler"
-  runtime          = "python3.8"
+  runtime          = "python3.10"
   source_code_hash = data.archive_file.zipit.output_base64sha256
 
   environment {
@@ -18,6 +18,10 @@ resource "aws_lambda_function" "image_processing_lambda" {
       SNS_TOPIC_ARN    = aws_sns_topic.image_processing_notifications.arn
     }
   }
+
+  layers = [
+    "arn:aws:lambda:us-west-2:770693421928:layer:Klayers-p310-Pillow:7"
+  ]
 
   tags = {
     Name        = "Image Processing Lambda"

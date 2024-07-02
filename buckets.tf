@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "user_upload_bucket" {
   bucket = "zilebado"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = {
@@ -119,7 +119,7 @@ resource "aws_s3_bucket" "processed_images_bucket" {
   bucket = "zilecompleted"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   tags = {
